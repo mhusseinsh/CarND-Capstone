@@ -136,7 +136,7 @@ class TLDetector(object):
         #return light.state
         if not self.has_image:
             self.prev_light_loc = None
-            rospy.loginfo("Did not have image")
+            rospy.loginfo("No image")
             return False
         
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
@@ -179,7 +179,7 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
-            rospy.loginfo("Traffic light state: %r, Distance: %r " % (LIGHTS[state], diff))
+            rospy.loginfo("Traffic Light: %r, at Distance: %r " % (LIGHTS[state], diff))
             return line_wp_index, state
         else:
             return -1, TrafficLight.UNKNOWN

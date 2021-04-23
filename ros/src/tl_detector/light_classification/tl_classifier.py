@@ -58,7 +58,6 @@ class TLClassifier(object):
             cv2.rectangle(image, (left, top), (right, bot), (255,0,0), 3)
             text = LIGHTS[int(classes[i])-1] + ': ' + str(int(scores[i]*100)) + '%'
             cv2.putText(image , text, (left, int(top - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (200,0,0), 1, cv2.LINE_AA)
-            #cv2.putText(image , text, (10, int(50 + i * 30)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (200,0,0), 1, cv2.LINE_AA)
 
     def filter_boxes(self, min_score, boxes, scores, classes):
         """Return boxes with a confidence >= `min_score`"""
@@ -84,21 +83,12 @@ class TLClassifier(object):
 
         """
         #TODO implement light color prediction
-        #image = np.dstack((image[:, :, 2], image[:, :, 1], image[:, :, 0]))
-        #if self.site:
-        #    width = image.shape[1]
-        #    height = image.shape[0]
-        #    #rospy.loginfo("Width: %r, height: %r" % (width, height))
-        #    #image = image[:int(height/2), :, :]
-        #image_np = np.expand_dims(np.asarray(image, dtype=np.uint8), 0)
 
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         (im_width, im_height, _) = image_rgb.shape
         image_np = np.expand_dims(image_rgb, axis=0)
 
-        #with tf.Session(graph=self.graph) as sess:
         with self.graph.as_default():
-            # Actual detection.
             (boxes, scores, classes) = self.sess.run([self.detection_boxes, self.detection_scores, self.detection_classes], 
                                                 feed_dict={self.image_tensor: image_np})
             # Remove unnecessary dimensions
@@ -106,9 +96,9 @@ class TLClassifier(object):
             scores = np.squeeze(scores)
             classes = np.squeeze(classes)
         
-            confidence_cutoff = 0.5
-            # Filter boxes with a confidence score less than `confidence_cutoff`
-            boxes, scores, classes = self.filter_boxes(confidence_cutoff, boxes, scores, classes)
+            confidence_threshold = 0.5
+            # Filter boxes with a confidence score less than `confidence_threshold`
+            boxes, scores, classes = self.filter_boxes(confidence_threshold, boxes, scores, classes)
         
         # Write image to disk
         write = False
