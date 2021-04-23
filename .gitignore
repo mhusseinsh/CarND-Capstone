@@ -2,5 +2,11 @@
 
 build
 devel
+venv
+.idea/
+output_images/frames/
+output_images/real_recording/
+model/
+ros/src/tl_detector/model/
 
 profile.tmp
