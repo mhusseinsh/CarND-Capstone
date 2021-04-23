@@ -1,14 +1,20 @@
 [//]: # (Image References)
 
 [architecture]: ./output_images/final-project-ros-graph-v2.png "Architecture"
+[tldetector]: ./output_images/tl-detector-ros-graph.png "TL Detector"
+[waypoint]: ./output_images/waypoint-updater-ros-graph.png "Waypoint Updater"
+[dbw]: ./output_images/dbw-node-ros-graph.png "Drive-By-Wire"
+[simulator]: ./output_images/simulator.png "Simulator"
+[sim]: ./output_images/sim.gif "Simulation"
+[real]: ./output_images/real.gif "Real"
 
 # **Capstone Project** 
-
 ## Report
 
 ---
 
 **Capstone Project**
+![alt text][simulator]
 # Overview
 This repository contains all the code needed to run the project for the System Integration course in Udacity's Self-Driving Car Nanodegree.
 
@@ -29,7 +35,7 @@ Carla uses waypoint navigation to drive on autonomously while avoiding obstacles
 
 1. **Perception**
    
-    a. Traffic Light Detection
+    a. Traffic Light Detection/Classification
 
     b. Obstacle Detection
 
@@ -39,7 +45,7 @@ Carla uses waypoint navigation to drive on autonomously while avoiding obstacles
 
 3. **Control**
 
-   Controlling the vehicle's behaviour by actuating throttle, steering and brake to navigate the waypoints with the target velocity.
+   Drive-By-Wire Node / Twist Controller: Controlling the vehicle's behaviour by actuating throttle, steering and brake to navigate the waypoints with the target velocity.
 
 An overview of the complete system architecture is shown below
 
@@ -47,6 +53,74 @@ An overview of the complete system architecture is shown below
     
 ## Perception
 
+### Traffic Light Detection / Classification
+![alt text][tldetector]
+
+|Topic | Info |
+|--- | --- |
+|/traffic_waypoint | index of the waypoint for nearest upcoming red light's stop line|
+|/current_pose| Provides the current position|
+|/base_waypoints| list of waypoints the car will be following|
+|/image_color |image stream from the car's camera|
+|/vehicle/traffic_lights | (x, y, z) coordinates of all traffic light|
+
+This node is responsible for detecting upcoming traffic lights on the way, and classifying them based on their current state (red, yellow, green, unknown).
+
+Tensorflow's [Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) was used to detect and classify the traffic lights in the images provided by the camera.
+
+A seperate [repository](https://github.com/mhusseinsh/CarND-Traffic-Light-Detection) was set for such a task.
+
+The Traffic Light dataset (extracted from the simulator or real data extracted from the provided [bag file](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/traffic_light_bag_file.zip)). The data is already extracted, labelled and provided by [Anthony Sarkis](https://medium.com/@anthony_sarkis), thanks to him!.
+
+Examples
+|                | Real Data                             | Sim Data                               | 
+| -------------- | --------------------------------------- | ------------------------------------------- |
+| Red Light | <img src="./output_images/left0140_output.jpg" width="400" height="200"> | <img src="./output_images/left0027_output.jpg" width="400" height="200"> |
+| Yellow Light | <img src="./output_images/left0701_output.jpg" width="400" height="200"> | <img src="./output_images/left0011_output.jpg" width="400" height="200"> |
+| Green Light | <img src="./output_images/left0282_output.jpg" width="400" height="200"> | <img src="./output_images/left0003_output.jpg" width="400" height="200"> |
+
+## Planning
+
+### Waypoint Updater
+![alt text][waypoint]
+|Topic | Info |Type|
+|--- | --- |--|
+|/final_waypoint |list of waypoints ahead of the car with target velocities |styx_msgs/Lane|
+|/obstacle_waypoint |  location to stop for obstacle|
+|/traffic_waypoint | location to stop for red light|
+|/current_pose| Provides the current position| geometry_msgs/PoseStamped|
+|/base_waypoints| list of waypoints the car will be following provided by a static .csv file|	styx_msgs/Lane |
+
+The purpose of this node is to update the associated target velocity of each waypoint defined in the whole waypoints list based on the state of the upcoming traffic light and the obstacle detection (which is not implemented). This node will subscribe to the /base_waypoints, /current_pose, /obstacle_waypoint, and /traffic_waypoint topics, and publishes in the end a list of waypoints ahead of the vehicle with associated velocites to /final_wayponts topic.
+
+## Control
+
+### Drive-By-Wire Node / Twist Controller
+![alt text][dbw]
+|Topic | Info |
+|--- | --- |
+|/current_velocity and /twist_cmd| target linear and angular velocity|
+|/vehicle/dbw_enabled| car control under dbw or manual|
+
+The purpose of this node to calculate the throttle, brake and steering commands and publish them to the vehicle.
+
+#### Drive-By-Wire Node
+Carla is equipped with a drive-by-wire (dbw) system, meaning the throttle, brake, and steering have electronic control. The dbw_node subscribes to the /current_velocity topic along with the /twist_cmd topic to receive target linear and angular velocities. Additionally, this node will subscribe to /vehicle/dbw_enabled, which indicates if the car is under dbw or driver control. This node will publish throttle, brake, and steering commands to the /vehicle/throttle_cmd, /vehicle/brake_cmd, and /vehicle/steering_cmd topics.
+
+#### Twist Controller
+The controller's main task is to control acceleration and steering values. The acceleration is controlled via a [PID Controller](https://github.com/mhusseinsh/CarND-Capstone/blob/master/ros/src/twist_controller/pid.py), while the steering is calculated via a [Yaw Controller](https://github.com/mhusseinsh/CarND-Capstone/blob/master/ros/src/twist_controller/yaw_controller.py) which calculates the needed angle to maintain the required velocity.
+
+# Results
+
+The system was tested on the simulator as well as real data provided by the given [bag file](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/traffic_light_bag_file.zip) to check the performance, and below are the results on both domains.
+
+## Simulation
+
+![alt text][sim]
+
+## Real Data
+
+![alt text][real]
 
 # Further README
 ## Installation
