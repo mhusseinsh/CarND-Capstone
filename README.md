@@ -110,8 +110,18 @@ Carla is equipped with a drive-by-wire (dbw) system, meaning the throttle, brake
 #### Twist Controller
 The controller's main task is to control acceleration and steering values. The acceleration is controlled via a [PID Controller](https://github.com/mhusseinsh/CarND-Capstone/blob/master/ros/src/twist_controller/pid.py), while the steering is calculated via a [Yaw Controller](https://github.com/mhusseinsh/CarND-Capstone/blob/master/ros/src/twist_controller/yaw_controller.py) which calculates the needed angle to maintain the required velocity.
 
-# Results
+# Results Evaluation and Success Criteria
 
+Based on the defined [Rubric Points](https://review.udacity.com/#!/rubrics/3058/view) the Capstone Project should achieve the below points:
+
+1. **The code is built successfully and connects to the simulator.**: By running `catkin_make`, `source devel/setup.sh` and `roslaunch launch/styx.launch` within the ros directory results in no errors and allows the program to connect to the simulator
+
+2. **Waypoints are published to plan Carla’s route around the track.**: Waypoints are published to `/final_waypoints` to plan the vehicle’s path around the track. No unnecessary moves (excessive lane changes, unnecessary turning, unprompted stops) are occurring. As in the Path Planning project, acceleration does not exceed 10 m/s^2 and jerk should not exceed 10 m/s^3.
+
+3. **Controller commands are published to operate Carla’s throttle, brake, and steering.**: `dbw_node.py` has been implemented to calculate and provide appropriate throttle, brake, and steering commands. The commands are published to `/vehicle/throttle_cmd`, `/vehicle/brake_cmd` and `/vehicle/steering_cmd`, as applicable.
+   
+4. **Successfully navigate the full track more than once.**: The vehicle is able to complete more than one full loop of the track without running off road or any other navigational issues (incorrect turns, random stops, teleportation, etc.).
+   
 The system was tested on the simulator as well as real data provided by the given [bag file](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/traffic_light_bag_file.zip) to check the performance, and below are the results on both domains.
 
 ## Simulation
