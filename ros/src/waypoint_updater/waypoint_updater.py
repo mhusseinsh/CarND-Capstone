@@ -139,8 +139,6 @@ class WaypointUpdater(object):
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
         if self.stopline_wp_idx != msg.data:
-            rospy.logwarn(
-                "New stopline is detected @idx={}, old stopline idx={}".format(msg.data, self.stopline_wp_idx))
             self.stopline_wp_idx = msg.data
 
     def obstacle_cb(self, msg):
