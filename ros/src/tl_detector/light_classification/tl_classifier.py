@@ -18,7 +18,7 @@ class TLClassifier(object):
             self.site = False
             PATH = 'model/frozen_model_sim/'
         FROZEN_GRAPH = PATH + 'frozen_inference_graph.pb'
-
+        
         self.graph = tf.Graph()
         with self.graph.as_default():
             od_graph_def = tf.GraphDef()
